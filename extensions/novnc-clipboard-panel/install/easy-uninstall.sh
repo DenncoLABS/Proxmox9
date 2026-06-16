@@ -2,6 +2,7 @@
 set -euo pipefail
 
 STAMP="dennco-clipboard-panel"
+LOADER_MARK="DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER"
 
 if [[ $EUID -ne 0 ]]; then
   echo "Run as root: sudo bash install/easy-uninstall.sh"
@@ -19,27 +20,48 @@ find_installed_html() {
   return 1
 }
 
-HTML_FILE="$(find_installed_html || true)"
+find_installed_loader() {
+  while IFS= read -r file; do
+    if grep -q "$LOADER_MARK" "$file" 2>/dev/null; then
+      echo "$file"
+      return 0
+    fi
+  done < <(find /usr/share/novnc-pve /usr/share/novnc -maxdepth 5 -type f -name "*.js" 2>/dev/null)
 
-if [[ -z "${HTML_FILE:-}" ]]; then
-  echo "Could not find an injected noVNC HTML file. Nothing to remove."
+  return 1
+}
+
+restore_file() {
+  local file="$1"
+  local backup="$file.$STAMP.bak"
+  local dir
+  dir="$(dirname "$file")"
+
+  if [[ -f "$backup" ]]; then
+    cp "$backup" "$file"
+    rm -f "$backup"
+  else
+    sed -i '/dennco-clipboard\/novnc-clipboard-panel.css/d' "$file" || true
+    sed -i '/dennco-clipboard\/novnc-clipboard-panel.js/d' "$file" || true
+    sed -i '/DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER/,/END_DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER/d' "$file" || true
+  fi
+
+  rm -rf "$dir/dennco-clipboard"
+  echo "Updated file: $file"
+}
+
+HTML_FILE="$(find_installed_html || true)"
+LOADER_FILE="$(find_installed_loader || true)"
+
+if [[ -n "${HTML_FILE:-}" ]]; then
+  restore_file "$HTML_FILE"
+elif [[ -n "${LOADER_FILE:-}" ]]; then
+  restore_file "$LOADER_FILE"
+else
+  echo "Could not find an injected noVNC file. Nothing to remove."
   exit 0
 fi
 
-HTML_DIR="$(dirname "$HTML_FILE")"
-TARGET_DIR="$HTML_DIR/dennco-clipboard"
-BACKUP_FILE="$HTML_FILE.$STAMP.bak"
-
-if [[ -f "$BACKUP_FILE" ]]; then
-  cp "$BACKUP_FILE" "$HTML_FILE"
-  rm -f "$BACKUP_FILE"
-else
-  sed -i '/dennco-clipboard\/novnc-clipboard-panel.css/d' "$HTML_FILE" || true
-  sed -i '/dennco-clipboard\/novnc-clipboard-panel.js/d' "$HTML_FILE" || true
-fi
-
-rm -rf "$TARGET_DIR"
 systemctl reload pveproxy 2>/dev/null || true
 
 echo "Removed Dennco noVNC clipboard panel."
-echo "Updated file: $HTML_FILE"
