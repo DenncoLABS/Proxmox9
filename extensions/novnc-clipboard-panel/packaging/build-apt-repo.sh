@@ -16,6 +16,9 @@ DIST_ROOT="$REPO_ROOT/dists/stable"
 DIST_ALL_DIR="$DIST_ROOT/main/binary-all"
 DIST_AMD64_DIR="$DIST_ROOT/main/binary-amd64"
 DEB_FILE="$ROOT_DIR/packaging/dist/${PKG_NAME}_${VERSION}_all.deb"
+REPO_URL="https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel"
+KEYRING_PATH="/usr/share/keyrings/dennco-proxmox-packages.gpg"
+SOURCE_PATH="/etc/apt/sources.list.d/dennco-novnc-clipboard.list"
 
 bash "$ROOT_DIR/packaging/build-deb.sh"
 
@@ -62,17 +65,50 @@ if [[ "${SIGN_APT_REPO:-0}" == "1" ]]; then
   gpg --batch --yes --clearsign --output "$DIST_ROOT/InRelease" "$DIST_ROOT/Release"
 fi
 
+cat > "$REPO_ROOT/install.sh" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "\$(id -u)" -ne 0 ]]; then
+  echo "Run this installer as root." >&2
+  exit 1
+fi
+
+if [[ ! -d /etc/pve && ! -d /usr/share/novnc-pve ]]; then
+  echo "Warning: this does not look like a Proxmox VE host." >&2
+fi
+
+if ! command -v curl >/dev/null 2>&1; then
+  apt-get update
+  apt-get install -y curl
+fi
+
+mkdir -p /usr/share/keyrings
+curl -fsSL "${REPO_URL}/keys/dennco-proxmox-packages.gpg" > "${KEYRING_PATH}"
+chmod 0644 "${KEYRING_PATH}"
+
+cat > "${SOURCE_PATH}" <<'SRC'
+deb [signed-by=${KEYRING_PATH}] ${REPO_URL} stable main
+SRC
+
+apt-get update
+apt-get install -y ${PKG_NAME}
+
+echo "Dennco noVNC clipboard panel install complete."
+EOF
+chmod 0755 "$REPO_ROOT/install.sh"
+
 cat > "$REPO_ROOT/README.txt" <<EOF
 Dennco APT repository for the Proxmox noVNC clipboard panel.
 
 Package: ${PKG_NAME}
 Version: ${VERSION}
 
-Testing source line:
-deb [trusted=yes] REPLACE_WITH_REPO_URL stable main
+One-line install:
+curl -fsSL ${REPO_URL}/install.sh | bash
 
 Signed source line:
-deb [signed-by=/usr/share/keyrings/dennco-proxmox-packages.gpg] REPLACE_WITH_REPO_URL stable main
+deb [signed-by=${KEYRING_PATH}] ${REPO_URL} stable main
 EOF
 
 cat > "$REPO_ROOT/index.html" <<EOF
@@ -83,8 +119,10 @@ cat > "$REPO_ROOT/index.html" <<EOF
 <h1>Dennco Proxmox noVNC Clipboard APT Repo</h1>
 <p>Package: ${PKG_NAME}</p>
 <p>Version: ${VERSION}</p>
-<pre>deb [trusted=yes] REPLACE_WITH_REPO_URL stable main</pre>
-<pre>deb [signed-by=/usr/share/keyrings/dennco-proxmox-packages.gpg] REPLACE_WITH_REPO_URL stable main</pre>
+<h2>Install</h2>
+<pre>curl -fsSL ${REPO_URL}/install.sh | bash</pre>
+<h2>Signed source</h2>
+<pre>deb [signed-by=${KEYRING_PATH}] ${REPO_URL} stable main</pre>
 </body>
 </html>
 EOF
