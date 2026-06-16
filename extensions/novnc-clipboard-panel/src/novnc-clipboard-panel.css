@@ -1,13 +1,13 @@
 #dncp-button {
-  width: 68px;
-  height: 68px;
-  margin: 10px auto;
+  width: 42px;
+  height: 42px;
+  margin: 7px auto;
   border: 1px solid rgba(255,255,255,0.25);
   border-radius: 2px;
   background: rgba(255,255,255,0.06);
   color: #f5f5f5;
-  font-size: 28px;
-  line-height: 68px;
+  font-size: 22px;
+  line-height: 42px;
   text-align: center;
   cursor: pointer;
   user-select: none;
@@ -20,8 +20,8 @@
 
 #dncp-button.dncp-fixed {
   position: fixed;
-  left: 18px;
-  top: 610px;
+  left: 628px;
+  top: 200px;
   margin: 0;
   background: #404040;
   border: 1px solid #777;
@@ -29,9 +29,9 @@
 
 #dncp-panel {
   position: fixed;
-  left: 105px;
-  top: 155px;
-  width: 360px;
+  left: 705px;
+  top: 195px;
+  width: 340px;
   padding: 12px;
   background: #202020;
   color: #f5f5f5;
@@ -47,12 +47,12 @@
 
 #dncp-panel h3 {
   margin: 0 0 8px 0;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 #dncp-text {
   width: 100%;
-  min-height: 150px;
+  min-height: 140px;
   box-sizing: border-box;
   background: #111;
   color: #eee;
