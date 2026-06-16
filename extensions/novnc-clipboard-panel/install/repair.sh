@@ -6,7 +6,12 @@ APP_ROOT="/usr/share/novnc-pve"
 LOADER="$APP_ROOT/app.js"
 STAMP="dennco-clipboard-panel"
 MARK="DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER"
+RELEASE_FILE="$SRC_DIR/RELEASE"
 EXT_VERSION="0.1.1"
+
+if [[ -f "$RELEASE_FILE" ]]; then
+  EXT_VERSION="$(grep '^release=' "$RELEASE_FILE" | cut -d '=' -f 2 | tr -d '[:space:]')"
+fi
 
 if [[ $EUID -ne 0 ]]; then
   echo "Run as root."
