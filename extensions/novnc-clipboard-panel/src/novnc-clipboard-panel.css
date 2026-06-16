@@ -32,28 +32,38 @@
   position: fixed;
   left: 705px;
   top: 195px;
-  width: 340px;
-  padding: 12px;
+  width: 390px;
+  padding: 0;
   background: #202020;
   color: #f5f5f5;
   border: 1px solid #555;
   border-radius: 4px;
   z-index: 99999;
   font-family: Arial, sans-serif;
+  box-sizing: border-box;
 }
 
 #dncp-panel[hidden] {
   display: none;
 }
 
-#dncp-panel h3 {
-  margin: 0 0 8px 0;
+#dncp-header {
+  padding: 10px 12px;
   font-size: 15px;
+  font-weight: bold;
+  cursor: move;
+  user-select: none;
+  background: #2a2a2a;
+  border-bottom: 1px solid #555;
+}
+
+#dncp-body {
+  padding: 10px 12px 12px 12px;
 }
 
 #dncp-text {
   width: 100%;
-  min-height: 140px;
+  min-height: 130px;
   box-sizing: border-box;
   background: #111;
   color: #eee;
@@ -61,17 +71,23 @@
   padding: 8px;
   font-family: monospace;
   font-size: 13px;
+  resize: vertical;
 }
 
 .dncp-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 8px;
   margin-top: 8px;
 }
 
 .dncp-actions button {
-  padding: 6px 10px;
+  min-width: 0;
+  padding: 7px 6px;
   cursor: pointer;
+  font-size: 13px;
+  line-height: 1.2;
+  white-space: normal;
 }
 
 #dncp-status {
