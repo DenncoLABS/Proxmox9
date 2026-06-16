@@ -1,26 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TARGET_DIR="/usr/share/novnc/app/dennco-clipboard"
-INDEX_FILE="/usr/share/novnc/vnc.html"
-BACKUP_FILE="/usr/share/novnc/vnc.html.dennco-clipboard.bak"
-PACKAGE_DIR="/usr/share/dennco/novnc-clipboard-panel"
+REPAIR_CMD="/usr/sbin/dennco-novnc-clipboard-repair"
 
-if [[ ! -f "$INDEX_FILE" ]]; then
-  echo "Warning: $INDEX_FILE was not found. Package files were installed but noVNC injection was skipped."
-  exit 0
+if [[ -x "$REPAIR_CMD" ]]; then
+  "$REPAIR_CMD"
+else
+  echo "Repair command not found: $REPAIR_CMD"
+  exit 1
 fi
 
-mkdir -p "$TARGET_DIR"
-cp "$PACKAGE_DIR/novnc-clipboard-panel.js" "$TARGET_DIR/novnc-clipboard-panel.js"
-cp "$PACKAGE_DIR/novnc-clipboard-panel.css" "$TARGET_DIR/novnc-clipboard-panel.css"
-
-if [[ ! -f "$BACKUP_FILE" ]]; then
-  cp "$INDEX_FILE" "$BACKUP_FILE"
-fi
-
-if ! grep -q "dennco-clipboard/novnc-clipboard-panel.js" "$INDEX_FILE"; then
-  sed -i 's#</head>#  <link rel="stylesheet" href="dennco-clipboard/novnc-clipboard-panel.css">\n  <script src="dennco-clipboard/novnc-clipboard-panel.js"></script>\n</head>#' "$INDEX_FILE"
-fi
-
-echo "Dennco noVNC clipboard panel installed."
+echo "Dennco noVNC clipboard panel installed or repaired."
