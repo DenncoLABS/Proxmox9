@@ -47,6 +47,28 @@ Remove the package:
 sudo apt remove dennco-novnc-clipboard-panel
 ```
 
+## APT repo build
+
+Build files for a web-hosted package source:
+
+```bash
+cd Proxmox9/extensions/novnc-clipboard-panel
+bash packaging/build-apt-repo.sh
+```
+
+Generated output:
+
+```text
+packaging/apt-repo/
+```
+
+See:
+
+```text
+docs/gui-repo.md
+docs/github-pages-repo.md
+```
+
 ## Files
 
 ```text
@@ -58,7 +80,10 @@ install/install.sh
 install/uninstall.sh
 packaging/build-deb.sh
 packaging/build-and-install-local.sh
+packaging/build-apt-repo.sh
 docs/design.md
+docs/gui-repo.md
+docs/github-pages-repo.md
 ```
 
 ## Notes
