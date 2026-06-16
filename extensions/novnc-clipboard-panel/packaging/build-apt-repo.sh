@@ -12,23 +12,26 @@ fi
 
 REPO_ROOT="$ROOT_DIR/packaging/apt-repo"
 POOL_DIR="$REPO_ROOT/pool/main/d/dennco-novnc-clipboard-panel"
-DIST_DIR="$REPO_ROOT/dists/stable/main/binary-all"
+DIST_ALL_DIR="$REPO_ROOT/dists/stable/main/binary-all"
+DIST_AMD64_DIR="$REPO_ROOT/dists/stable/main/binary-amd64"
 DEB_FILE="$ROOT_DIR/packaging/dist/${PKG_NAME}_${VERSION}_all.deb"
 
 bash "$ROOT_DIR/packaging/build-deb.sh"
 
 rm -rf "$REPO_ROOT"
-mkdir -p "$POOL_DIR" "$DIST_DIR"
+mkdir -p "$POOL_DIR" "$DIST_ALL_DIR" "$DIST_AMD64_DIR"
 cp "$DEB_FILE" "$POOL_DIR/"
 
 cd "$REPO_ROOT"
 if command -v apt-ftparchive >/dev/null 2>&1; then
-  apt-ftparchive packages pool > "$DIST_DIR/Packages"
+  apt-ftparchive packages pool > "$DIST_ALL_DIR/Packages"
 else
-  dpkg-scanpackages pool /dev/null > "$DIST_DIR/Packages"
+  dpkg-scanpackages pool /dev/null > "$DIST_ALL_DIR/Packages"
 fi
 
-gzip -kf "$DIST_DIR/Packages"
+cp "$DIST_ALL_DIR/Packages" "$DIST_AMD64_DIR/Packages"
+gzip -kf "$DIST_ALL_DIR/Packages"
+gzip -kf "$DIST_AMD64_DIR/Packages"
 
 cat > "$REPO_ROOT/README.txt" <<EOF
 Dennco APT repository for the Proxmox noVNC clipboard panel.
