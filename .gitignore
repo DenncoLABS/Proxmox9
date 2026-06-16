@@ -1,0 +1,27 @@
+# OS/editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Build output
+build/
+dist/
+out/
+*.deb
+*.changes
+*.buildinfo
+*.dsc
+*.tar.*
+
+# Local upstream mirrors can become very large.
+# Remove this ignore rule if you intentionally want to commit mirrored upstream source.
+upstream/*
+!upstream/README.md
+
+# Local environment
+.env
+.env.*
+!.env.example
