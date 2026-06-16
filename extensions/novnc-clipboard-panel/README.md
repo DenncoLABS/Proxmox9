@@ -23,7 +23,7 @@ Test on a non-production Proxmox node before broad deployment.
 Run as root on a Proxmox host:
 
 ```bash
-curl -fsSL https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel/install.sh | bash
+curl -fsSL https://denncolabs.github.io/Proxmox9/novnc-clipboard-panel/install.sh | bash
 ```
 
 The installer automatically:
@@ -42,10 +42,10 @@ After install, open a VM console in a private browser window or hard-refresh the
 For administrators who prefer to configure the repo manually:
 
 ```bash
-curl -fsSL https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel/keys/dennco-proxmox-packages.gpg > /usr/share/keyrings/dennco-proxmox-packages.gpg
+curl -fsSL https://denncolabs.github.io/Proxmox9/novnc-clipboard-panel/keys/dennco-proxmox-packages.gpg > /usr/share/keyrings/dennco-proxmox-packages.gpg
 
 cat > /etc/apt/sources.list.d/dennco-novnc-clipboard.list <<'EOF'
-deb [signed-by=/usr/share/keyrings/dennco-proxmox-packages.gpg] https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel stable main
+deb [signed-by=/usr/share/keyrings/dennco-proxmox-packages.gpg] https://denncolabs.github.io/Proxmox9/novnc-clipboard-panel stable main
 EOF
 
 apt update
@@ -128,7 +128,7 @@ Clone and run the direct installer from a Proxmox host:
 ```bash
 apt update
 apt install -y git
-git clone https://github.com/dustinlbayn/Proxmox9.git
+git clone https://github.com/DenncoLABS/Proxmox9.git
 cd Proxmox9/extensions/novnc-clipboard-panel
 bash install/easy-install.sh
 ```
@@ -167,7 +167,7 @@ packaging/apt-repo/
 The public client key is published at:
 
 ```text
-https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel/keys/dennco-proxmox-packages.gpg
+https://denncolabs.github.io/Proxmox9/novnc-clipboard-panel/keys/dennco-proxmox-packages.gpg
 ```
 
 The private signing key is not committed to this repository. GitHub Actions uses the private key from the repository secret:
