@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PKG_NAME="dennco-novnc-clipboard-panel"
-VERSION="0.1.0"
+VERSION="0.1.1"
 BUILD_ROOT="$ROOT_DIR/packaging/build"
 PKG_ROOT="$BUILD_ROOT/${PKG_NAME}_${VERSION}_all"
 OUT_DIR="$ROOT_DIR/packaging/dist"
