@@ -9,17 +9,6 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-find_installed_html() {
-  while IFS= read -r file; do
-    if grep -q "dennco-clipboard/novnc-clipboard-panel.js" "$file" 2>/dev/null; then
-      echo "$file"
-      return 0
-    fi
-  done < <(find /usr/share -maxdepth 5 -type f \( -name "vnc.html" -o -name "index.html" \) 2>/dev/null)
-
-  return 1
-}
-
 find_installed_loader() {
   while IFS= read -r file; do
     if grep -q "$LOADER_MARK" "$file" 2>/dev/null; then
@@ -41,24 +30,20 @@ restore_file() {
     cp "$backup" "$file"
     rm -f "$backup"
   else
-    sed -i '/dennco-clipboard\/novnc-clipboard-panel.css/d' "$file" || true
-    sed -i '/dennco-clipboard\/novnc-clipboard-panel.js/d' "$file" || true
     sed -i '/DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER/,/END_DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER/d' "$file" || true
   fi
 
   rm -rf "$dir/dennco-clipboard"
+  rm -rf "$dir/app/dennco-clipboard"
   echo "Updated file: $file"
 }
 
-HTML_FILE="$(find_installed_html || true)"
 LOADER_FILE="$(find_installed_loader || true)"
 
-if [[ -n "${HTML_FILE:-}" ]]; then
-  restore_file "$HTML_FILE"
-elif [[ -n "${LOADER_FILE:-}" ]]; then
+if [[ -n "${LOADER_FILE:-}" ]]; then
   restore_file "$LOADER_FILE"
 else
-  echo "Could not find an injected noVNC file. Nothing to remove."
+  echo "Could not find an injected noVNC loader file. Nothing to remove."
   exit 0
 fi
 
