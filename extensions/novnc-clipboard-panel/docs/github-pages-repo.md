@@ -1,38 +1,70 @@
-# GitHub Pages option
+# GitHub Pages APT repository
 
-One easy hosting option is GitHub Pages.
+The Proxmox noVNC clipboard package can be published through GitHub Pages.
 
-Use this shape:
+Expected public URL:
 
 ```text
 https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel
 ```
 
-The package files must be placed at that path so the folder contains:
+The published folder should contain:
 
 ```text
 dists/stable/main/binary-all/Packages
 dists/stable/main/binary-all/Packages.gz
-dists/stable/main/binary-all/dennco-novnc-clipboard-panel_0.1.0_all.deb
+pool/main/d/dennco-novnc-clipboard-panel/dennco-novnc-clipboard-panel_0.1.1_all.deb
+README.txt
+index.html
 ```
 
-Build the files with:
+Build and stage the GitHub Pages folder with:
 
 ```bash
-cd Proxmox9/extensions/novnc-clipboard-panel
-bash packaging/build-apt-repo.sh
+cd ~/Proxmox9/extensions/novnc-clipboard-panel
+bash packaging/publish-github-pages.sh
 ```
 
-Then copy the generated `packaging/apt-repo/` contents into a published site folder named:
+That script builds the Debian package, builds the APT metadata, and copies the generated repository into:
 
 ```text
-novnc-clipboard-panel
+docs/novnc-clipboard-panel/
 ```
 
-After GitHub Pages is enabled, the Proxmox source line would be:
+Commit and push the generated files:
+
+```bash
+cd ~/Proxmox9
+git add docs/novnc-clipboard-panel extensions/novnc-clipboard-panel
+git commit -m "Publish noVNC clipboard APT repository"
+git push
+```
+
+In GitHub, enable Pages for this repository using:
 
 ```text
-deb https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel stable main
+Source: Deploy from a branch
+Branch: main
+Folder: /docs
 ```
 
-Use a signed package source for production.
+Then add the source on Proxmox by creating this file:
+
+```text
+/etc/apt/sources.list.d/dennco-novnc-clipboard.list
+```
+
+with this line:
+
+```text
+deb [trusted=yes] https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel stable main
+```
+
+Then run:
+
+```bash
+apt update
+apt install dennco-novnc-clipboard-panel
+```
+
+Use trusted mode only for early testing. For production, sign the repository and install the public key instead.
