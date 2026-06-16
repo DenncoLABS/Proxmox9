@@ -6,6 +6,7 @@ JS_SRC="$EXT_DIR/src/novnc-clipboard-panel.js"
 CSS_SRC="$EXT_DIR/src/novnc-clipboard-panel.css"
 STAMP="dennco-clipboard-panel"
 LOADER_MARK="DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER"
+EXT_VERSION="0.1.1"
 
 if [[ $EUID -ne 0 ]]; then
   echo "Run as root: sudo bash install/easy-install.sh"
@@ -79,8 +80,8 @@ install_into_js_loader() {
     Object.keys(attrs).forEach(function (key) { el.setAttribute(key, attrs[key]); });
     document.head.appendChild(el);
   }
-  addAsset('link', { rel: 'stylesheet', href: '${asset_prefix}/novnc-clipboard-panel.css' });
-  addAsset('script', { src: '${asset_prefix}/novnc-clipboard-panel.js' });
+  addAsset('link', { rel: 'stylesheet', href: '${asset_prefix}/novnc-clipboard-panel.css?v=${EXT_VERSION}' });
+  addAsset('script', { src: '${asset_prefix}/novnc-clipboard-panel.js?v=${EXT_VERSION}' });
 })();
 /* END_DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER */
 EOF
@@ -89,6 +90,7 @@ EOF
   echo "Backup file: $backup_file"
   echo "Asset folder: $target_dir"
   echo "Asset URL prefix: $asset_prefix"
+  echo "Extension version: $EXT_VERSION"
 }
 
 LOADER_FILE="$(find_js_loader || true)"
@@ -103,4 +105,4 @@ install_into_js_loader "$LOADER_FILE"
 systemctl reload pveproxy 2>/dev/null || true
 
 echo "Installed Dennco noVNC clipboard panel."
-echo "Open the console in a private window or hard refresh the browser."
+echo "Open the console in a normal or private window and refresh the browser."
