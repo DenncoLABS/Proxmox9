@@ -1,0 +1,32 @@
+name: Build noVNC clipboard Debian package
+
+on:
+  push:
+    paths:
+      - 'extensions/novnc-clipboard-panel/**'
+      - '.github/workflows/build-novnc-clipboard-deb.yml'
+  pull_request:
+    paths:
+      - 'extensions/novnc-clipboard-panel/**'
+      - '.github/workflows/build-novnc-clipboard-deb.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y dpkg-dev
+
+      - name: Build package
+        working-directory: extensions/novnc-clipboard-panel
+        run: bash packaging/build-deb.sh
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dennco-novnc-clipboard-panel-deb
+          path: extensions/novnc-clipboard-panel/packaging/dist/*.deb
