@@ -4,9 +4,14 @@ set -euo pipefail
 EXT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 JS_SRC="$EXT_DIR/src/novnc-clipboard-panel.js"
 CSS_SRC="$EXT_DIR/src/novnc-clipboard-panel.css"
+RELEASE_FILE="$EXT_DIR/RELEASE"
 STAMP="dennco-clipboard-panel"
 LOADER_MARK="DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER"
 EXT_VERSION="0.1.1"
+
+if [[ -f "$RELEASE_FILE" ]]; then
+  EXT_VERSION="$(grep '^release=' "$RELEASE_FILE" | cut -d '=' -f 2 | tr -d '[:space:]')"
+fi
 
 if [[ $EUID -ne 0 ]]; then
   echo "Run as root: sudo bash install/easy-install.sh"
