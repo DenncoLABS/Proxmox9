@@ -34,19 +34,28 @@ cp "$DIST_ALL_DIR/Packages" "$DIST_AMD64_DIR/Packages"
 gzip -kf "$DIST_ALL_DIR/Packages"
 gzip -kf "$DIST_AMD64_DIR/Packages"
 
+RELEASE_TMP="$DIST_ROOT/Release.generated"
 if command -v apt-ftparchive >/dev/null 2>&1; then
-  apt-ftparchive release "$DIST_ROOT" > "$DIST_ROOT/Release"
+  apt-ftparchive release "$DIST_ROOT" > "$RELEASE_TMP"
 else
-  cat > "$DIST_ROOT/Release" <<EOF
+  : > "$RELEASE_TMP"
+fi
+
+cat > "$DIST_ROOT/Release" <<EOF
 Origin: Dennco
 Label: Dennco Proxmox Packages
 Suite: stable
 Codename: stable
+Version: ${VERSION}
 Architectures: amd64 all
 Components: main
 Description: Dennco Proxmox package repository
 EOF
+
+if [[ -s "$RELEASE_TMP" ]]; then
+  grep -Ev '^(Origin|Label|Suite|Codename|Version|Architectures|Components|Description):' "$RELEASE_TMP" >> "$DIST_ROOT/Release"
 fi
+rm -f "$RELEASE_TMP"
 
 if [[ "${SIGN_APT_REPO:-0}" == "1" ]]; then
   gpg --batch --yes --armor --detach-sign --output "$DIST_ROOT/Release.gpg" "$DIST_ROOT/Release"
