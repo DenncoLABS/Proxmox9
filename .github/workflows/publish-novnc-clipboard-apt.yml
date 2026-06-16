@@ -21,17 +21,34 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      SIGN_APT_REPO: '1'
+      APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
       - name: Install package tools
-        run: sudo apt-get update && sudo apt-get install -y dpkg-dev apt-utils
+        run: sudo apt-get update && sudo apt-get install -y dpkg-dev apt-utils gnupg
+
+      - name: Import APT signing key
+        run: |
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          printf '%s' "$APT_GPG_PRIVATE_KEY" > /tmp/dennco-apt-private-key.asc
+          gpg --batch --import /tmp/dennco-apt-private-key.asc
+          rm -f /tmp/dennco-apt-private-key.asc
 
       - name: Build APT repository
         run: |
           cd extensions/novnc-clipboard-panel
           bash packaging/build-apt-repo.sh
+
+      - name: Export public signing key
+        run: |
+          mkdir -p extensions/novnc-clipboard-panel/packaging/apt-repo/keys
+          gpg --batch --yes --armor --export "Dennco Proxmox Packages" > extensions/novnc-clipboard-panel/packaging/apt-repo/keys/dennco-proxmox-packages.asc
+          gpg --batch --yes --export "Dennco Proxmox Packages" > extensions/novnc-clipboard-panel/packaging/apt-repo/keys/dennco-proxmox-packages.gpg
 
       - name: Stage Pages site
         run: |
