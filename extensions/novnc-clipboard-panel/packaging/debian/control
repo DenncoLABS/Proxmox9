@@ -1,0 +1,11 @@
+Package: dennco-novnc-clipboard-panel
+Version: 0.1.0
+Section: admin
+Priority: optional
+Architecture: all
+Maintainer: Dennco Information Systems <dustinbayn@denncoholdingcompany.com>
+Depends: bash, sed, coreutils
+Description: Dennco clipboard panel overlay for Proxmox noVNC
+ Adds a browser-side clipboard panel to the Proxmox noVNC console.
+ This package installs JavaScript and CSS overlay files and injects them
+ into the local noVNC console page.
