@@ -33,11 +33,13 @@ jobs:
 
       - name: Import APT signing key
         run: |
+          test -n "$APT_GPG_PRIVATE_KEY"
           mkdir -p ~/.gnupg
           chmod 700 ~/.gnupg
-          printf '%s' "$APT_GPG_PRIVATE_KEY" > /tmp/dennco-apt-private-key.asc
+          printf '%s\n' "$APT_GPG_PRIVATE_KEY" > /tmp/dennco-apt-private-key.asc
           gpg --batch --import /tmp/dennco-apt-private-key.asc
           rm -f /tmp/dennco-apt-private-key.asc
+          gpg --batch --list-secret-keys --keyid-format LONG
 
       - name: Build APT repository
         run: |
@@ -47,8 +49,9 @@ jobs:
       - name: Export public signing key
         run: |
           mkdir -p extensions/novnc-clipboard-panel/packaging/apt-repo/keys
-          gpg --batch --yes --armor --export "Dennco Proxmox Packages" > extensions/novnc-clipboard-panel/packaging/apt-repo/keys/dennco-proxmox-packages.asc
-          gpg --batch --yes --export "Dennco Proxmox Packages" > extensions/novnc-clipboard-panel/packaging/apt-repo/keys/dennco-proxmox-packages.gpg
+          gpg --batch --yes --armor --export > extensions/novnc-clipboard-panel/packaging/apt-repo/keys/dennco-proxmox-packages.asc
+          gpg --batch --yes --export > extensions/novnc-clipboard-panel/packaging/apt-repo/keys/dennco-proxmox-packages.gpg
+          test -s extensions/novnc-clipboard-panel/packaging/apt-repo/keys/dennco-proxmox-packages.gpg
 
       - name: Stage Pages site
         run: |
