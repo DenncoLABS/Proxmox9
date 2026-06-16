@@ -47,6 +47,24 @@ Remove the package:
 sudo apt remove dennco-novnc-clipboard-panel
 ```
 
+## Repair after updates
+
+The Debian package now installs a repair command:
+
+```bash
+sudo dennco-novnc-clipboard-repair
+```
+
+Package upgrades call this automatically. If a Proxmox update overwrites the noVNC HTML file, the next package upgrade will re-copy the latest files and re-inject the clipboard panel.
+
+APT only upgrades when the package version increases. Bugfix releases must bump the package version.
+
+See:
+
+```text
+docs/bugfix-update-flow.md
+```
+
 ## APT repo build
 
 Build files for a web-hosted package source:
@@ -76,6 +94,7 @@ src/novnc-clipboard-panel.js
 src/novnc-clipboard-panel.css
 install/easy-install.sh
 install/easy-uninstall.sh
+install/repair.sh
 install/install.sh
 install/uninstall.sh
 packaging/build-deb.sh
@@ -84,6 +103,7 @@ packaging/build-apt-repo.sh
 docs/design.md
 docs/gui-repo.md
 docs/github-pages-repo.md
+docs/bugfix-update-flow.md
 ```
 
 ## Notes
