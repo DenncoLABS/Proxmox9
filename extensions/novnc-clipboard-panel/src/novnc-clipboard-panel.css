@@ -11,10 +11,20 @@
   text-align: center;
   cursor: pointer;
   user-select: none;
+  z-index: 99998;
 }
 
 #dncp-button:hover {
   background: rgba(255,255,255,0.14);
+}
+
+#dncp-button.dncp-fixed {
+  position: fixed;
+  left: 18px;
+  top: 610px;
+  margin: 0;
+  background: #404040;
+  border: 1px solid #777;
 }
 
 #dncp-panel {
@@ -28,7 +38,6 @@
   border: 1px solid #555;
   border-radius: 4px;
   z-index: 99999;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
   font-family: Arial, sans-serif;
 }
 
