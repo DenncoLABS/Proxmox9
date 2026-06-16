@@ -54,10 +54,10 @@ install_into_js_loader() {
   base_dir="$(dirname "$loader_file")"
   target_dir="$base_dir/dennco-clipboard"
   backup_file="$loader_file.$STAMP.bak"
-  asset_prefix="dennco-clipboard"
 
+  asset_prefix="/novnc/dennco-clipboard"
   if [[ "$loader_file" == */app/* ]]; then
-    asset_prefix="app/dennco-clipboard"
+    asset_prefix="/novnc/app/dennco-clipboard"
   fi
 
   mkdir -p "$target_dir"
@@ -68,10 +68,9 @@ install_into_js_loader() {
     cp "$loader_file" "$backup_file"
   fi
 
-  if grep -q "$LOADER_MARK" "$loader_file"; then
-    echo "Clipboard loader is already injected in $loader_file"
-  else
-    cat >> "$loader_file" <<EOF
+  sed -i '/DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER/,/END_DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER/d' "$loader_file" || true
+
+  cat >> "$loader_file" <<EOF
 
 /* DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER */
 (function () {
@@ -85,11 +84,11 @@ install_into_js_loader() {
 })();
 /* END_DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER */
 EOF
-  fi
 
   echo "Injected loader file: $loader_file"
   echo "Backup file: $backup_file"
   echo "Asset folder: $target_dir"
+  echo "Asset URL prefix: $asset_prefix"
 }
 
 LOADER_FILE="$(find_js_loader || true)"
