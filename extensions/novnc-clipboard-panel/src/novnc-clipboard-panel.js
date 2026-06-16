@@ -25,19 +25,11 @@
   function sendCharToCanvas(canvas, ch) {
     const key = ch === '\n' ? 'Enter' : ch;
     const code = ch === '\n' ? 'Enter' : '';
-    const eventBase = {
-      key,
-      code,
-      bubbles: true,
-      cancelable: true,
-      composed: true
-    };
+    const eventBase = { key, code, bubbles: true, cancelable: true, composed: true };
 
     canvas.focus();
     canvas.dispatchEvent(new KeyboardEvent('keydown', eventBase));
-    if (ch !== '\n') {
-      canvas.dispatchEvent(new KeyboardEvent('keypress', eventBase));
-    }
+    if (ch !== '\n') canvas.dispatchEvent(new KeyboardEvent('keypress', eventBase));
     canvas.dispatchEvent(new KeyboardEvent('keyup', eventBase));
   }
 
@@ -73,6 +65,37 @@
     setStatus('Cleared.');
   }
 
+  function enablePanelMove(panel) {
+    const header = document.getElementById('dncp-header');
+    if (!header) return;
+
+    let active = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    header.addEventListener('pointerdown', (event) => {
+      active = true;
+      const rect = panel.getBoundingClientRect();
+      offsetX = event.clientX - rect.left;
+      offsetY = event.clientY - rect.top;
+      header.setPointerCapture(event.pointerId);
+    });
+
+    header.addEventListener('pointermove', (event) => {
+      if (!active) return;
+      const maxLeft = Math.max(0, window.innerWidth - panel.offsetWidth);
+      const maxTop = Math.max(0, window.innerHeight - panel.offsetHeight);
+      const left = Math.min(Math.max(0, event.clientX - offsetX), maxLeft);
+      const top = Math.min(Math.max(0, event.clientY - offsetY), maxTop);
+      panel.style.left = left + 'px';
+      panel.style.top = top + 'px';
+    });
+
+    header.addEventListener('pointerup', () => {
+      active = false;
+    });
+  }
+
   function buildPanel() {
     if (document.getElementById(PANEL_ID)) return;
 
@@ -80,22 +103,23 @@
     panel.id = PANEL_ID;
     panel.hidden = true;
     panel.innerHTML = `
-      <h3>Console Clipboard</h3>
-      <textarea id="${TEXT_ID}" spellcheck="false" placeholder="Paste text here, then click Send to Console"></textarea>
-      <div class="dncp-actions">
-        <button id="dncp-send" type="button">Send to Console</button>
-        <button id="dncp-clear" type="button">Clear</button>
-        <button id="dncp-close" type="button">Close</button>
+      <div id="dncp-header">Console Clipboard</div>
+      <div id="dncp-body">
+        <textarea id="${TEXT_ID}" spellcheck="false" placeholder="Paste text here, then click Send"></textarea>
+        <div class="dncp-actions">
+          <button id="dncp-send" type="button">Send</button>
+          <button id="dncp-clear" type="button">Clear</button>
+          <button id="dncp-close" type="button">Close</button>
+        </div>
+        <div id="${STATUS_ID}">Ready.</div>
       </div>
-      <div id="${STATUS_ID}">Ready.</div>
     `;
     document.body.appendChild(panel);
 
     document.getElementById('dncp-send').addEventListener('click', sendText);
     document.getElementById('dncp-clear').addEventListener('click', clearText);
-    document.getElementById('dncp-close').addEventListener('click', () => {
-      panel.hidden = true;
-    });
+    document.getElementById('dncp-close').addEventListener('click', () => { panel.hidden = true; });
+    enablePanelMove(panel);
   }
 
   function openPanel() {
@@ -143,11 +167,8 @@
     if (controlBar) {
       const controls = findSidebarAnchor();
       const gear = controls.find((el) => /settings|gear/i.test(el.id + ' ' + el.title + ' ' + el.className));
-      if (gear && gear.parentNode) {
-        gear.parentNode.insertBefore(button, gear);
-      } else {
-        controlBar.appendChild(button);
-      }
+      if (gear && gear.parentNode) gear.parentNode.insertBefore(button, gear);
+      else controlBar.appendChild(button);
       return true;
     }
 
@@ -158,19 +179,13 @@
 
   function boot() {
     buildPanel();
-
     let attempts = 0;
     const timer = setInterval(() => {
       attempts += 1;
-      if (insertButton() || attempts > 40) {
-        clearInterval(timer);
-      }
+      if (insertButton() || attempts > 40) clearInterval(timer);
     }, 500);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
-  } else {
-    boot();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
