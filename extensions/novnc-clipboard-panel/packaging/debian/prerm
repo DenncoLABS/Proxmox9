@@ -1,18 +1,36 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TARGET_DIR="/usr/share/novnc/app/dennco-clipboard"
-INDEX_FILE="/usr/share/novnc/vnc.html"
-BACKUP_FILE="/usr/share/novnc/vnc.html.dennco-clipboard.bak"
+STAMP="dennco-clipboard-panel"
+MARK_START="DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER"
+MARK_END="END_DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER"
 
-if [[ -f "$BACKUP_FILE" && -f "$INDEX_FILE" ]]; then
-  cp "$BACKUP_FILE" "$INDEX_FILE"
-  rm -f "$BACKUP_FILE"
-elif [[ -f "$INDEX_FILE" ]]; then
-  sed -i '/dennco-clipboard\/novnc-clipboard-panel.css/d' "$INDEX_FILE" || true
-  sed -i '/dennco-clipboard\/novnc-clipboard-panel.js/d' "$INDEX_FILE" || true
-fi
+LOADER_FILES=(
+  "/usr/share/novnc-pve/app.js"
+  "/usr/share/novnc-pve/app/ui.js"
+  "/usr/share/novnc/app.js"
+  "/usr/share/novnc/app/ui.js"
+  "/usr/share/novnc/vnc.html"
+)
 
-rm -rf "$TARGET_DIR"
+ASSET_DIRS=(
+  "/usr/share/novnc-pve/dennco-clipboard"
+  "/usr/share/novnc-pve/app/dennco-clipboard"
+  "/usr/share/novnc/dennco-clipboard"
+  "/usr/share/novnc/app/dennco-clipboard"
+)
+
+for file in "${LOADER_FILES[@]}"; do
+  if [[ -f "$file" ]]; then
+    sed -i "/$MARK_START/,/$MARK_END/d" "$file" || true
+  fi
+
+done
+
+for dir in "${ASSET_DIRS[@]}"; do
+  rm -rf "$dir"
+done
+
+systemctl reload pveproxy 2>/dev/null || true
 
 echo "Dennco noVNC clipboard panel removed."
