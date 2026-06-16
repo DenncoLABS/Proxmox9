@@ -1,73 +1,155 @@
 # noVNC Clipboard Panel
 
-Prototype extension for adding a browser-side clipboard panel to the Proxmox noVNC console.
+Browser-side clipboard panel for the Proxmox noVNC console.
 
-Goal:
+The extension adds a clipboard button to the Proxmox noVNC side control bar. The button opens a small textarea panel where text can be pasted in the browser and sent into the active console as typed keystrokes.
 
-- Add a clipboard button to the noVNC side control bar.
-- Open a small textarea panel.
-- Let the user paste text into the browser.
-- Send the text into the active noVNC console as typed keystrokes.
+This is not true guest clipboard synchronization. It is paste-as-keystrokes for Proxmox browser consoles.
 
-This is an overlay prototype. It should be tested on a non-production Proxmox node before live use.
+## Current status
 
-## Super easy install
+```text
+Package: dennco-novnc-clipboard-panel
+Version: 0.1.2 beta
+Target: Proxmox VE 9.x / noVNC console
+Install method: signed APT repo hosted on GitHub Pages
+Update method: apt update && apt upgrade
+```
 
-From the Proxmox host:
+Test on a non-production Proxmox node before broad deployment.
+
+## One-line install
+
+Run as root on a Proxmox host:
+
+```bash
+curl -fsSL https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel/install.sh | bash
+```
+
+The installer automatically:
+
+1. Downloads the Dennco public APT signing key.
+2. Installs the key at `/usr/share/keyrings/dennco-proxmox-packages.gpg`.
+3. Adds the signed APT source file at `/etc/apt/sources.list.d/dennco-novnc-clipboard.list`.
+4. Runs `apt update`.
+5. Installs `dennco-novnc-clipboard-panel`.
+6. Repairs/reinjects the noVNC loader through the package post-install script.
+
+After install, open a VM console in a private browser window or hard-refresh the noVNC page.
+
+## Manual signed APT setup
+
+For administrators who prefer to configure the repo manually:
+
+```bash
+curl -fsSL https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel/keys/dennco-proxmox-packages.gpg > /usr/share/keyrings/dennco-proxmox-packages.gpg
+
+cat > /etc/apt/sources.list.d/dennco-novnc-clipboard.list <<'EOF'
+deb [signed-by=/usr/share/keyrings/dennco-proxmox-packages.gpg] https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel stable main
+EOF
+
+apt update
+apt install dennco-novnc-clipboard-panel
+```
+
+## Update
+
+Once installed from the APT repo, updates are handled normally:
+
+```bash
+apt update
+apt upgrade
+```
+
+Or upgrade only this package:
+
+```bash
+apt install --only-upgrade dennco-novnc-clipboard-panel
+```
+
+Package upgrades run the repair command automatically. If a Proxmox update overwrites the noVNC files, reinstalling or upgrading this package re-copies the extension files and reinjects the loader block.
+
+## Verify install
+
+```bash
+dpkg -l | grep dennco-novnc
+tail -25 /usr/share/novnc-pve/app.js
+```
+
+Expected loader block:
+
+```javascript
+/* DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER */
+(function () {
+  function addAsset(tag, attrs) {
+    var el = document.createElement(tag);
+    Object.keys(attrs).forEach(function (key) { el.setAttribute(key, attrs[key]); });
+    document.head.appendChild(el);
+  }
+  addAsset('link', { rel: 'stylesheet', href: '/novnc/dennco-clipboard/novnc-clipboard-panel.css?v=0.1.2' });
+  addAsset('script', { src: '/novnc/dennco-clipboard/novnc-clipboard-panel.js?v=0.1.2' });
+})();
+/* END_DENNCO_NOVNC_CLIPBOARD_PANEL_LOADER */
+```
+
+## Remove
+
+```bash
+apt remove dennco-novnc-clipboard-panel
+```
+
+To remove the repo and signing key too:
+
+```bash
+rm -f /etc/apt/sources.list.d/dennco-novnc-clipboard.list
+rm -f /usr/share/keyrings/dennco-proxmox-packages.gpg
+apt update
+```
+
+## Repair after Proxmox updates
+
+The Debian package installs a repair command:
+
+```bash
+dennco-novnc-clipboard-repair
+```
+
+Run it manually if the panel disappears after a Proxmox/noVNC update:
+
+```bash
+dennco-novnc-clipboard-repair
+systemctl reload pveproxy
+```
+
+## Local development install
+
+Clone and run the direct installer from a Proxmox host:
 
 ```bash
 apt update
 apt install -y git
 git clone https://github.com/dustinlbayn/Proxmox9.git
 cd Proxmox9/extensions/novnc-clipboard-panel
-sudo bash install/easy-install.sh
+bash install/easy-install.sh
 ```
 
-Then open the VM console in a private browser window, or hard-refresh the noVNC page.
-
-## Super easy remove
+Remove the direct install:
 
 ```bash
 cd Proxmox9/extensions/novnc-clipboard-panel
-sudo bash install/easy-uninstall.sh
+bash install/easy-uninstall.sh
 ```
 
-## Package install test
+## Local package build test
 
 Build and install the local Debian package:
 
 ```bash
 cd Proxmox9/extensions/novnc-clipboard-panel
-sudo bash packaging/build-and-install-local.sh
+bash packaging/build-and-install-local.sh
 ```
 
-Remove the package:
-
-```bash
-sudo apt remove dennco-novnc-clipboard-panel
-```
-
-## Repair after updates
-
-The Debian package now installs a repair command:
-
-```bash
-sudo dennco-novnc-clipboard-repair
-```
-
-Package upgrades call this automatically. If a Proxmox update overwrites the noVNC HTML file, the next package upgrade will re-copy the latest files and re-inject the clipboard panel.
-
-APT only upgrades when the package version increases. Bugfix releases must bump the package version.
-
-See:
-
-```text
-docs/bugfix-update-flow.md
-```
-
-## APT repo build
-
-Build files for a web-hosted package source:
+Build the APT repository locally:
 
 ```bash
 cd Proxmox9/extensions/novnc-clipboard-panel
@@ -80,11 +162,26 @@ Generated output:
 packaging/apt-repo/
 ```
 
-See:
+## Repository signing
+
+The public client key is published at:
 
 ```text
-docs/gui-repo.md
-docs/github-pages-repo.md
+https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel/keys/dennco-proxmox-packages.gpg
+```
+
+The private signing key is not committed to this repository. GitHub Actions uses the private key from the repository secret:
+
+```text
+APT_GPG_PRIVATE_KEY
+```
+
+The published repo includes:
+
+```text
+dists/stable/InRelease
+dists/stable/Release
+dists/stable/Release.gpg
 ```
 
 ## Files
@@ -100,12 +197,14 @@ install/uninstall.sh
 packaging/build-deb.sh
 packaging/build-and-install-local.sh
 packaging/build-apt-repo.sh
+packaging/publish-github-pages.sh
 docs/design.md
 docs/gui-repo.md
 docs/github-pages-repo.md
 docs/bugfix-update-flow.md
+docs/signed-apt-repo.md
 ```
 
 ## Notes
 
-The first version uses paste-as-keystrokes. It does not provide true guest clipboard synchronization.
+This extension sends pasted text as keystrokes through noVNC. It does not provide true clipboard synchronization inside the guest operating system.
