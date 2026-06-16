@@ -7,6 +7,8 @@
   const STATUS_ID = 'dncp-status';
   const TYPE_DELAY_MS = 20;
 
+  window.DNCP_LOADED = true;
+
   function setStatus(message) {
     const status = document.getElementById(STATUS_ID);
     if (status) status.textContent = message;
@@ -96,12 +98,24 @@
     });
   }
 
+  function openPanel() {
+    buildPanel();
+    const panel = document.getElementById(PANEL_ID);
+    panel.hidden = !panel.hidden;
+    if (!panel.hidden) {
+      const textarea = document.getElementById(TEXT_ID);
+      if (textarea) textarea.focus();
+    }
+  }
+
   function findSidebarAnchor() {
     const selectors = [
       '#noVNC_control_bar .noVNC_button',
       '#noVNC_control_bar button',
       '#noVNC_control_bar div',
-      '.noVNC_button'
+      '.noVNC_button',
+      '[id*="settings"]',
+      '[title*="Settings"]'
     ];
 
     for (const selector of selectors) {
@@ -112,23 +126,19 @@
     return [];
   }
 
-  function insertButton() {
-    if (document.getElementById(BUTTON_ID)) return true;
-
+  function makeButton() {
     const button = document.createElement('div');
     button.id = BUTTON_ID;
     button.title = 'Clipboard';
     button.textContent = '📋';
-    button.addEventListener('click', () => {
-      buildPanel();
-      const panel = document.getElementById(PANEL_ID);
-      panel.hidden = !panel.hidden;
-      if (!panel.hidden) {
-        const textarea = document.getElementById(TEXT_ID);
-        if (textarea) textarea.focus();
-      }
-    });
+    button.addEventListener('click', openPanel);
+    return button;
+  }
 
+  function insertButton() {
+    if (document.getElementById(BUTTON_ID)) return true;
+
+    const button = makeButton();
     const controlBar = document.getElementById('noVNC_control_bar') || document.querySelector('.noVNC_control_bar');
     if (controlBar) {
       const controls = findSidebarAnchor();
@@ -141,7 +151,9 @@
       return true;
     }
 
-    return false;
+    button.classList.add('dncp-fixed');
+    document.body.appendChild(button);
+    return true;
   }
 
   function boot() {
