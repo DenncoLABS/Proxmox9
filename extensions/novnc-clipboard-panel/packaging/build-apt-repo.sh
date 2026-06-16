@@ -16,7 +16,7 @@ DIST_ROOT="$REPO_ROOT/dists/stable"
 DIST_ALL_DIR="$DIST_ROOT/main/binary-all"
 DIST_AMD64_DIR="$DIST_ROOT/main/binary-amd64"
 DEB_FILE="$ROOT_DIR/packaging/dist/${PKG_NAME}_${VERSION}_all.deb"
-REPO_URL="https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel"
+REPO_URL="https://denncolabs.github.io/Proxmox9/novnc-clipboard-panel"
 KEYRING_PATH="/usr/share/keyrings/dennco-proxmox-packages.gpg"
 SOURCE_PATH="/etc/apt/sources.list.d/dennco-novnc-clipboard.list"
 
