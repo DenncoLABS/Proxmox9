@@ -1,42 +1,53 @@
 # Signed APT repository notes
 
-The APT repository now builds normal Debian repository metadata:
+The APT repository builds normal Debian repository metadata:
 
 ```text
 dists/stable/Release
+dists/stable/InRelease
+dists/stable/Release.gpg
 ```
 
-This removes the earlier missing-release warning once the GitHub Pages workflow republishes the site.
+Clients should use the signed repository with a local keyring file.
 
-The repository can still be used in testing mode with:
+## Production source line
 
 ```text
-deb [trusted=yes] https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel stable main
+deb [signed-by=/usr/share/keyrings/dennco-proxmox-packages.gpg] https://denncolabs.github.io/Proxmox9/novnc-clipboard-panel stable main
 ```
 
-For production, publish a public key file and switch clients to a signed-by source line:
-
-```text
-deb [signed-by=/usr/share/keyrings/dennco-proxmox-packages.gpg] https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel stable main
-```
-
-Client-side setup shape:
+## One-line install
 
 ```bash
-curl -fsSL https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel/keys/dennco-proxmox-packages.gpg > /usr/share/keyrings/dennco-proxmox-packages.gpg
+curl -fsSL https://denncolabs.github.io/Proxmox9/novnc-clipboard-panel/install.sh | bash
+```
 
-echo "deb [signed-by=/usr/share/keyrings/dennco-proxmox-packages.gpg] https://dustinlbayn.github.io/Proxmox9/novnc-clipboard-panel stable main" > /etc/apt/sources.list.d/dennco-novnc-clipboard.list
+## Manual client-side setup
+
+```bash
+curl -fsSL https://denncolabs.github.io/Proxmox9/novnc-clipboard-panel/keys/dennco-proxmox-packages.gpg > /usr/share/keyrings/dennco-proxmox-packages.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/dennco-proxmox-packages.gpg] https://denncolabs.github.io/Proxmox9/novnc-clipboard-panel stable main" > /etc/apt/sources.list.d/dennco-novnc-clipboard.list
 
 apt update
 apt install dennco-novnc-clipboard-panel
 ```
 
-Signing requires adding a signing key to the publishing environment and generating:
+## Published signing files
+
+Signing requires adding a private signing key to the GitHub Actions environment as a repository secret named:
+
+```text
+APT_GPG_PRIVATE_KEY
+```
+
+The workflow publishes:
 
 ```text
 dists/stable/InRelease
 dists/stable/Release.gpg
 keys/dennco-proxmox-packages.gpg
+keys/dennco-proxmox-packages.asc
 ```
 
-Do not commit a secret signing key into the repository.
+The private signing key must not be committed to the repository. Proxmox clients only receive the public key.
